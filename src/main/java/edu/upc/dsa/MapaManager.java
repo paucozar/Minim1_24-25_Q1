@@ -11,7 +11,7 @@ public interface MapaManager {
     public List<Usuario> getUsuarioOrdenadoAlfabeticamente();
     public Usuario getUsuario(String id);
     public PuntoInteres addPuntoInteres(int horizontal, int vertical, ElementType type);
-    public Usuario registrarPuntoUsuario(String id, int horizontal, int vertical);
+    public void registrarPuntoUsuario(String id, int horizontal, int vertical);
     public List<PuntoInteres> getPuntosInteresUsuario(String id);
     public List<Usuario> getUsuariosHanPasadoPorAqui(int horizontal, int vertical);
     public List<PuntoInteres> getPuntosInteresPorTipo(ElementType type);

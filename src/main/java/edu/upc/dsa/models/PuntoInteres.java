@@ -7,10 +7,14 @@ public class PuntoInteres {
     private int vertical;
     private ElementType type;
 
+    public PuntoInteres() {
+    }
     public PuntoInteres(int horizontal, int vertical, ElementType type) {
-        this.horizontal = horizontal;
-        this.vertical = vertical;
-        this.type = type;
+        this();
+        this.setHorizontal(horizontal);
+        this.setVertical(vertical);
+        this.setType(type);
+
     }
 
     public int getHorizontal() {

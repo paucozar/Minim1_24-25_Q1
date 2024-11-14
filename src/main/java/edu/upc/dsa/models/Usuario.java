@@ -12,12 +12,16 @@ public class Usuario {
     private String fechaNacimiento;
     private List<PuntoInteres> puntosInteres;
 
+    public Usuario() {
+    }
+
     public Usuario(String id, String nombre, String apellido, String email, String fechaNacimiento) {
-        this.id = id;
-        this.nombre = nombre;
-        this.apellido = apellido;
-        this.email = email;
-        this.fechaNacimiento = fechaNacimiento;
+        this();
+        this.setId(id);
+        this.setNombre(nombre);
+        this.setApellido(apellido);
+        this.setEmail(email);
+        this.setFechaNacimiento(fechaNacimiento);
         this.puntosInteres = new ArrayList<>();
     }
 

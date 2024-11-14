@@ -5,18 +5,23 @@ import edu.upc.dsa.models.PuntoInteres;
 import edu.upc.dsa.models.ElementType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 
 public class MapaManagerImpl implements MapaManager {
     private static MapaManager instance;
     private List<Usuario> usuarios;
     private List<PuntoInteres> puntosInteres;
+    private Map<String, List<PuntoInteres>> usuarioPuntosInteres;
     final static Logger logger = Logger.getLogger(MapaManagerImpl.class);
 
     private MapaManagerImpl() {
         this.usuarios = new ArrayList<>();
         this.puntosInteres = new ArrayList<>();
+        this.usuarioPuntosInteres = new HashMap<>();
     }
 
     public static MapaManager getInstance() {
@@ -35,7 +40,7 @@ public class MapaManagerImpl implements MapaManager {
         Usuario usunuevo = new Usuario(id, nombre, apellido, email, fechaNacimiento);
         this.usuarios.add(usunuevo);
 
-        logger.info("Usuario added");
+        logger.info("Usuario added" + usunuevo);
         return usunuevo;
     }
     public List<Usuario> getUsuarioOrdenadoAlfabeticamente() {
@@ -51,7 +56,7 @@ public class MapaManagerImpl implements MapaManager {
 
         for (Usuario u: this.usuarios) {
             if (u.getId().equals(id)) {
-                logger.info("Usuario encontrado");
+                logger.info("Usuario encontrado" + u);
                 return u;
             }
         }
@@ -64,7 +69,7 @@ public class MapaManagerImpl implements MapaManager {
         try {
             PuntoInteres puntonuevo = new PuntoInteres(horizontal, vertical, type);
             this.puntosInteres.add(puntonuevo);
-            logger.info("Punto de interes añadido");
+            logger.info("Punto de interes añadido" + puntonuevo);
             return puntonuevo;
         } catch (Exception e) {
             logger.error("Error adding point of interest: " + e.getMessage());
@@ -72,36 +77,21 @@ public class MapaManagerImpl implements MapaManager {
             return null;
         }
     }
-    public Usuario registrarPuntoUsuario(String id, int horizontal, int vertical) {
-        logger.info("registrarPuntoUsuario(" + id + "," + horizontal + "," + vertical + ")");
-        try {
-            Usuario usuario = getUsuario(id);
-            if (usuario == null) {
-                logger.warn("User with ID " + id + " not found.");
-                return null;
-            }
-
-            PuntoInteres puntoInteres = null;
-            for (PuntoInteres punto : this.puntosInteres) {
-                if (punto.getHorizontal() == horizontal && punto.getVertical() == vertical) {
-                    puntoInteres = punto;
-                    break;
-                }
-            }
-
-            if (puntoInteres == null) {
-                logger.warn("Point of interest at coordinates (" + horizontal + ", " + vertical + ") not found.");
-                return null;
-            }
-
-            usuario.setPuntosInteres(puntosInteres);
-            logger.info("User " + id + " registered at point of interest (" + horizontal + ", " + vertical + ")");
-            return usuario;
-        } catch (Exception e) {
-            logger.error("Error registering user at point of interest: " + e.getMessage());
-            logger.fatal("Fatal error registering user at point of interest: " + e.getMessage());
-            return null;
+    public void registrarPuntoUsuario(String id, int horizontal, int vertical) {
+        logger.info("registrarPuntoUsuario(" + id + ", " + horizontal + ", " + vertical + ")");
+        Usuario usuario = this.getUsuario(id);
+        if (usuario == null) {
+            logger.error("Usuario no encontrado: " + id);
+            return;
         }
+        for (PuntoInteres puntoInteres : this.puntosInteres) {
+            if (puntoInteres.getHorizontal() == horizontal && puntoInteres.getVertical() == vertical) {
+                this.usuarioPuntosInteres.get(id).add(puntoInteres);
+                logger.info("Punto de interés registrado para el usuario: " + puntoInteres);
+                return;
+            }
+        }
+        logger.error("Punto de interés no encontrado en las coordenadas: (" + horizontal + ", " + vertical + ")");
     }
     public List<PuntoInteres> getPuntosInteresUsuario(String id) {
         logger.info("getPuntosInteresUsuario(" + id + ")");
@@ -125,10 +115,10 @@ public class MapaManagerImpl implements MapaManager {
         logger.info("getUsuariosHanPasadoPorAqui(" + horizontal + ", " + vertical + ")");
         try {
             List<Usuario> usuariosHanPasadoPorAqui = new ArrayList<>();
-            for (Usuario usuario : this.usuarios) {
-                for (PuntoInteres puntoInteres : usuario.getPuntosInteres()) {
+            for (Map.Entry<String, List<PuntoInteres>> lista : this.usuarioPuntosInteres.entrySet()) {
+                for (PuntoInteres puntoInteres : lista.getValue()) {
                     if (puntoInteres.getHorizontal() == horizontal && puntoInteres.getVertical() == vertical) {
-                        usuariosHanPasadoPorAqui.add(usuario);
+                        usuariosHanPasadoPorAqui.add(this.getUsuario(lista.getKey()));
                         break;
                     }
                 }
@@ -160,6 +150,7 @@ public class MapaManagerImpl implements MapaManager {
 
         this.usuarios.clear();
         this.puntosInteres.clear();
+        this.usuarioPuntosInteres.clear();
     }
 
 }

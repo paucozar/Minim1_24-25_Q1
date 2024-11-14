@@ -43,10 +43,10 @@ public class MapaService {
             @ApiResponse(code = 500, message = "Validation Error")
     })
     @Path("/usuario")
-    public Response addUsuario(@PathParam("id") String id, @PathParam("nombre") String nombre, @PathParam("apellido") String apellido, @PathParam("email") String email, @PathParam("fechaNacimiento") String fechaNacimiento) {
-        if (id == null || nombre == null || apellido == null || email == null || fechaNacimiento == null)
-            return Response.status(500).entity("Validation Error: Missing parameters").build();
-        Usuario usuario = this.mm.addUsuario(id, nombre, apellido, email, fechaNacimiento);
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response addUsuario(Usuario usuario) {
+        this.mm.addUsuario(usuario.getId(), usuario.getNombre(), usuario.getApellido(), usuario.getEmail(), usuario.getFechaNacimiento());
         return Response.status(200).entity(usuario).build();
     }
 
@@ -73,8 +73,7 @@ public class MapaService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUsuario(@PathParam("id") String id) {
         Usuario usuario = this.mm.getUsuario(id);
-        if (usuario == null) return Response.status(404).build();
-        else return Response.status(200).entity(usuario).build();
+        return Response.status(200).entity(usuario).build();
     }
 
     @POST
@@ -85,11 +84,10 @@ public class MapaService {
     })
     @Path("/puntoInteres")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response addPuntoInteres(@PathParam("horizontal") int horizontal, @PathParam("vertical") int vertical, @PathParam("type") ElementType type) {
-        if (horizontal < 0 || vertical < 0 || type == null)
-            return Response.status(500).entity(null).build();
-        PuntoInteres puntoInteres = this.mm.addPuntoInteres(horizontal, vertical, type);
-        return Response.status(200).entity(puntoInteres).build();
+    @Produces (MediaType.APPLICATION_JSON)
+    public Response addPuntoInteres(PuntoInteres p) {
+        this.mm.addPuntoInteres(p.getHorizontal(), p.getVertical(), p.getType());
+        return Response.status(200).entity(p).build();
     }
 
     @POST
@@ -101,12 +99,9 @@ public class MapaService {
     })
     @Path("/usuario/{id}/puntoInteres")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response registrarPuntoUsuario(@PathParam("id") String id, @PathParam("horizontal") int horizontal, @PathParam("vertical") int vertical) {
-        if (id == null || horizontal < 0 || vertical < 0)
-            return Response.status(500).entity(null).build();
-        Usuario usuario = this.mm.registrarPuntoUsuario(id, horizontal, vertical);
-        if (usuario == null) return Response.status(404).build();
-        else return Response.status(200).entity(usuario).build();
+    public Response registrarPuntoUsuario(@PathParam("id") String id, PuntoInteres p) {
+        this.mm.registrarPuntoUsuario(id, p.getHorizontal(), p.getVertical());
+        return Response.status(200).entity("Punto de interes registrado correctamente").build();
     }
 
     @GET
@@ -119,12 +114,9 @@ public class MapaService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getPuntosInteresUsuario(@PathParam("id") String id) {
         List<PuntoInteres> puntosInteres = this.mm.getPuntosInteresUsuario(id);
-        if (puntosInteres == null) return Response.status(404).build();
-        else {
-            GenericEntity<List<PuntoInteres>> entity = new GenericEntity<List<PuntoInteres>>(puntosInteres) {};
-            return Response.status(200).entity(entity).build();
+        GenericEntity<List<PuntoInteres>> entity = new GenericEntity<List<PuntoInteres>>(puntosInteres) {};
+        return Response.status(200).entity(entity).build();
         }
-    }
 
     @GET
     @ApiOperation(value = "get usuarios que han pasado por un punto de interes", notes = "asdasd")
@@ -134,13 +126,10 @@ public class MapaService {
     })
     @Path("/puntoInteres/{horizontal}/{vertical}/usuarios")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUsuariosHanPasadoPorAqui(@PathParam("horizontal") int horizontal, @PathParam("vertical") int vertical) {
-        List<Usuario> usuarios = this.mm.getUsuariosHanPasadoPorAqui(horizontal, vertical);
-        if (usuarios == null) return Response.status(404).build();
-        else {
-            GenericEntity<List<Usuario>> entity = new GenericEntity<List<Usuario>>(usuarios) {};
-            return Response.status(200).entity(entity).build();
-        }
+    public Response getUsuariosHanPasadoPorAqui(PuntoInteres puntoInteres) {
+        List<Usuario> usuarios = this.mm.getUsuariosHanPasadoPorAqui(puntoInteres.getHorizontal(), puntoInteres.getVertical());
+        GenericEntity<List<Usuario>> entity = new GenericEntity<List<Usuario>>(usuarios) {};
+        return Response.status(200).entity(entity).build();
     }
 
     @GET
@@ -153,10 +142,7 @@ public class MapaService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getPuntosInteresPorTipo(@PathParam("type") ElementType type) {
         List<PuntoInteres> puntosInteres = this.mm.getPuntosInteresPorTipo(type);
-        if (puntosInteres == null) return Response.status(404).build();
-        else {
-            GenericEntity<List<PuntoInteres>> entity = new GenericEntity<List<PuntoInteres>>(puntosInteres) {};
-            return Response.status(200).entity(entity).build();
-        }
+        GenericEntity<List<PuntoInteres>> entity = new GenericEntity<List<PuntoInteres>>(puntosInteres) {};
+        return Response.status(200).entity(entity).build();
     }
 }
